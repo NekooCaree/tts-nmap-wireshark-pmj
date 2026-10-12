@@ -1,0 +1,22 @@
+# Opsional: capture HTTP, DNS, dan ICMP di network namespace server web.
+services:
+  capture-web:
+    profiles: [capture]
+    build: ./tools/capture
+    network_mode: service:web-toko
+    depends_on:
+      web-toko: {condition: service_healthy}
+    cap_drop: [ALL]
+    cap_add: [NET_RAW, NET_ADMIN, DAC_OVERRIDE]
+    security_opt: ["no-new-privileges:true"]
+    read_only: true
+    volumes: ["./captures:/captures"]
+    # Resolver Docker dapat memakai port UDP hasil translasi, sehingga capture UDP penuh.
+    command: [tcpdump, -Z, root, -i, any, -U, -s, "0", -w, /captures/web-toko.pcap, "tcp port 8080 or udp or tcp port 53 or icmp"]
+    healthcheck:
+      test: [CMD, python, -c, "assert b'tcpdump' in open('/proc/1/cmdline','rb').read()"]
+      interval: 20s
+      timeout: 3s
+      retries: 3
+    mem_limit: 96m
+    pids_limit: 32

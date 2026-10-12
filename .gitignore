@@ -1,0 +1,9 @@
+.env
+node_modules/
+__pycache__/
+*.pyc
+.runtime/
+captures/*.pcap*
+captures/*.nmap
+captures/*.xml
+captures/*.gnmap

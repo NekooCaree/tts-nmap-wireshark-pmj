@@ -1,0 +1,37 @@
+PRAKTIKUM NMAP & WIRESHARK - TOOLS ASLI
+
+Target lab: 172.31.250.10 (target.lab)
+Website di dalam desktop: http://172.31.250.10:8080
+
+1. Jalankan di terminal ini:
+   nmap -sT -Pn -n -sV -p 21,22,23,25,3306,6379,8080,27017 172.31.250.10
+
+2. Buka Wireshark dengan mengetik: wireshark &
+   Pilih interface eth0, mulai capture, lalu ulangi Nmap.
+   Filter: ip.addr == 172.31.250.10
+
+3. Buka toko: firefox-esr http://172.31.250.10:8080 &
+   Login dummy: mahasiswa-demo / belajar123
+   Filter Wireshark: http
+   Pilih paket login POST lalu Follow > TCP Stream.
+   Gunakan data dummy saja. Jangan masukkan password pribadi.
+
+4. Latihan ICMP: ping -c 3 172.31.250.10
+   Filter Wireshark: icmp
+   Latihan DNS: dig @172.31.250.10 tokoku.lab
+   Filter Wireshark: dns
+   DNS lab ini mengembalikan IP target tetap, tanpa meneruskan ke internet.
+
+5. FTP: mahasiswa / ftpbelajar123 (akun contoh, berbeda dari toko).
+   curl --user mahasiswa:ftpbelajar123 ftp://172.31.250.10/
+   curl --user mahasiswa:ftpbelajar123 ftp://172.31.250.10/README.txt -o README-lab.txt
+   Upload hanya ke /uploads, maksimum 2 MiB, nama file unik per mahasiswa.
+   Filter: ftp || ftp-data
+
+6. Simpan capture dan hasil scan di /home/student/lab-files.
+   Capture DNS/ICMP tombol website berasal dari server web;
+   lihat docs/02-wireshark-exercises.md untuk capture pada sisi server.
+
+Klik kanan area kosong desktop untuk menu Terminal, Wireshark, TokoKu.
+Satu link = satu desktop bersama. Bergantian saat demo/kerja kelompok.
+Scan hanya IP target lab ini. Internet desktop dibatasi ke jaringan lab.

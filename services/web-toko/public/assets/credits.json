@@ -1,0 +1,30 @@
+{
+  "note": "Foto nyata sebagai ilustrasi katalog fiktif TokoKu. Tidak ada afiliasi merek atau fotografer.",
+  "license": "https://unsplash.com/license",
+  "photos": [
+    {
+      "file": "headphone.jpg",
+      "photographer": "C D-X",
+      "source": "https://unsplash.com/photos/black-level-wireless-headphones-on-yellow-surface-PvIz8BmuwDw",
+      "download": "https://images.unsplash.com/photo-1505751171710-1f6d0ace5a85?fm=jpg&fit=max&w=1200&q=85"
+    },
+    {
+      "file": "keyboard.jpg",
+      "photographer": "Alex de Koning",
+      "source": "https://unsplash.com/photos/white-mechanical-keyboard-with-a-wooden-base-S7ZwwEZvTEg",
+      "download": "https://images.unsplash.com/photo-1781275370325-d92af940176e?fm=jpg&fit=max&w=1200&q=85"
+    },
+    {
+      "file": "speaker.jpg",
+      "photographer": "Zulfugar Karimov",
+      "source": "https://unsplash.com/photos/hand-holding-a-yellow-portable-speaker-with-buttons-ys37W6acTnM",
+      "download": "https://images.unsplash.com/photo-1762328500592-c6f654d07e6e?fm=jpg&fit=max&w=1200&q=85"
+    },
+    {
+      "file": "mouse.jpg",
+      "photographer": "Fer Troulik",
+      "source": "https://unsplash.com/photos/a-white-computer-mouse-on-a-white-background-LP3nV76f2TA",
+      "download": "https://images.unsplash.com/photo-1772531606450-0dd023c265d7?fm=jpg&fit=max&w=1200&q=85"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# Dipakai bersama docker-compose.yml, bukan sebagai file standalone.
+# !override mencegah port loopback lama ikut tergabung; perlu Compose >= 2.24.4.
+x-prod: &production
+  restart: unless-stopped
+
+services:
+  web-toko:
+    <<: *production
+    ports: !override ["0.0.0.0:${WEB_PORT:-8080}:8080"]
+  ftp-fake:
+    <<: *production
+    ports: !override ["0.0.0.0:${FTP_PORT:-21}:21", "0.0.0.0:30000-30009:30000-30009"]
+    cap_add: [NET_BIND_SERVICE]
+  ssh-fake:
+    <<: *production
+    # Port 2222 agar port 22 tetap dapat dipakai SSH administrasi VPS.
+    ports: !override ["0.0.0.0:${VPS_SSH_PORT:-2222}:22"]
+    cap_add: [NET_BIND_SERVICE]
+  smtp-fake:
+    <<: *production
+    ports: !override ["0.0.0.0:${SMTP_PORT:-25}:25"]
+    cap_add: [NET_BIND_SERVICE]
+  mysql-fake:
+    <<: *production
+    ports: !override ["0.0.0.0:${MYSQL_PORT:-3306}:3306"]
+  redis-fake:
+    <<: *production
+    ports: !override ["0.0.0.0:${REDIS_PORT:-6379}:6379"]
+  telnet-fake:
+    <<: *production
+    ports: !override ["0.0.0.0:${TELNET_PORT:-23}:23"]
+    cap_add: [NET_BIND_SERVICE]
+  mongodb-fake:
+    <<: *production
+    ports: !override ["0.0.0.0:${MONGODB_PORT:-27017}:27017"]
+# Healthcheck, limits, logging, dan labnet diwarisi dari konfigurasi dasar.

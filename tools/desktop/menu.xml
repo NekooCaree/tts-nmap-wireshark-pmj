@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+  <menu id="root-menu" label="Praktikum Nmap &amp; Wireshark">
+    <item label="Terminal"><action name="Execute"><command>xterm -fa 'DejaVu Sans Mono' -fs 11</command></action></item>
+    <item label="Wireshark"><action name="Execute"><command>wireshark</command></action></item>
+    <item label="TokoKu (HTTP lab)"><action name="Execute"><command>firefox-esr http://172.31.250.10:8080</command></action></item>
+    <item label="Petunjuk praktikum"><action name="Execute"><command>xterm -fa 'DejaVu Sans Mono' -fs 11 -e less /opt/desktop/welcome.txt</command></action></item>
+    <separator/>
+    <item label="Rapikan jendela"><action name="Reconfigure"/></item>
+  </menu>
+</openbox_menu>

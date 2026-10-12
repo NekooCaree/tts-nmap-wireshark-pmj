@@ -1,0 +1,58 @@
+NASKAH PENGAJAR - JANGAN DIUNGGAH SEBAGAI HALAMAN WEBSITE
+
+Hari ini kita memakai desktop Linux lewat browser. Nmap dan Wireshark
+yang digunakan adalah tools asli. Targetnya adalah IP private lab
+172.31.250.10, yang menyediakan delapan layanan untuk latihan.
+Enam layanan meniru banner dan respons protokol. Website mempunyai
+akun dan pesanan tersimpan. FTP benar-benar bisa login dan transfer
+file, tetapi aksesnya terbatas pada folder latihan. Tidak ada shell
+SSH atau database sungguhan yang diberikan kepada mahasiswa.
+
+Pertama, kita jalankan Nmap -sT -Pn -n -sV dan daftar delapan port.
+Perhatikan hasil open, nama service, dan versi yang terdeteksi.
+Nmap mengirim probe lalu mencocokkan respons. Karena banner bisa
+ditiru, hasil versi bukan bukti pasti software atau sistem operasi.
+
+Kedua, buka Wireshark, pilih eth0, mulai capture, lalu ulangi scan.
+Cari SYN, SYN/ACK, dan ACK. Scan TCP connect (-sT) menyelesaikan
+handshake. Sesudahnya, amati paket probe serta balasan layanan.
+Follow TCP Stream pada FTP memperlihatkan banner yang dibaca Nmap.
+
+Ketiga, tetap lakukan capture dan buka TokoKu dari browser desktop.
+Login memakai mahasiswa-demo dan belajar123. Gunakan filter http
+dan cari POST /api/login. Follow TCP Stream memperlihatkan isi
+request beserta username/password dummy karena koneksi toko di
+jaringan lab sengaja menggunakan HTTP.
+
+Link ngrok untuk masuk desktop memakai HTTPS, sedangkan koneksi
+browser DI DALAM desktop menuju toko menggunakan HTTP. Keduanya
+berbeda. Wireshark pada laptop mahasiswa tidak otomatis melihat
+paket di container; capture harus dilakukan pada desktop lab.
+
+Keempat, tambah barang ke keranjang, ubah jumlah, lalu checkout.
+Amati POST /api/checkout dan respons nomor pesanan. Harga dihitung
+server; data kartu hanya contoh. Buka pesanan untuk membatalkan
+atau melanjutkan status pengiriman simulasi.
+
+Kelima, gunakan curl untuk login FTP mahasiswa / ftpbelajar123.
+Unduh README.txt, unggah file ke uploads, ubah nama, lalu hapus.
+Filter ftp memperlihatkan USER, PASS, dan perintah transfer. Data
+file melewati koneksi terpisah pada port pasif 30000 sampai 30009.
+Diskusikan perbedaan open port, autentikasi berhasil, dan hak tulis.
+Command lengkap ada di docs/07-tokoku-ftp-praktikum.md.
+
+Keenam, jalankan ping -c 3 172.31.250.10 serta
+dig @172.31.250.10 tokoku.lab. Amati echo request/reply dan DNS
+query/response. DNS ini record latihan tetap, bukan resolver publik.
+Tombol DNS/ping pada website membuat trafik di sisi server web;
+untuk itu pengajar menggunakan capture server sesuai panduan lokal.
+
+Desktop ini satu layar bersama. Pilih satu operator atau bergantian
+per kelompok. Semua mahasiswa dapat mengendalikan layar yang sama;
+link ini belum menyediakan desktop terpisah untuk tiap peserta.
+Laptop pengajar, Docker, dan ngrok harus tetap berjalan.
+
+Tugas mahasiswa: jawab lima soal di docs/05-desktop-online.md,
+simpan hasil Nmap dan pcapng ke folder kelompok, lalu kumpulkan
+laporan dengan bukti paket. Scan hanya target yang diizinkan dan
+gunakan seluruh data dummy. Jangan menggunakan password pribadi.

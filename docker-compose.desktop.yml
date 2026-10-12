@@ -1,0 +1,122 @@
+services:
+  ftp-fake:
+    environment:
+      FTP_PASV_ADDRESS: "172.31.250.10"
+  lab-target:
+    profiles: [desktop]
+    build: ./tools/target-proxy
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
+      net.ipv4.ip_forward: "0"
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    networks:
+      labnet: {}
+      desktopnet:
+        ipv4_address: 172.31.250.10
+        aliases: [target.lab]
+    depends_on:
+      web-toko: {condition: service_healthy}
+      ftp-fake: {condition: service_healthy}
+      ssh-fake: {condition: service_healthy}
+      telnet-fake: {condition: service_healthy}
+      smtp-fake: {condition: service_healthy}
+      mysql-fake: {condition: service_healthy}
+      redis-fake: {condition: service_healthy}
+      mongodb-fake: {condition: service_healthy}
+    mem_limit: 96m
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',8080),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+
+  lab-desktop:
+    profiles: [desktop]
+    build: ./tools/desktop
+    init: true
+    user: "10001:10001"
+    group_add: [wireshark]
+    # Lock/socket X11 harus hilang setelah container berhenti, termasuk SIGKILL.
+    # Hasil praktikum tetap berada pada volume /home/student/lab-files.
+    tmpfs: ["/tmp:size=128m,mode=1777"]
+    stop_grace_period: 20s
+    cap_drop: [ALL]
+    # dumpcap memakai file capabilities untuk capture sebagai user student.
+    # no-new-privileges tidak dipasang karena akan menonaktifkan file capabilities.
+    cap_add: [NET_RAW, NET_ADMIN]
+    sysctls:
+      net.ipv4.ping_group_range: "0 2147483647"
+      net.ipv4.ip_forward: "0"
+    shm_size: 128m
+    environment:
+      DISPLAY: ":1"
+      DESKTOP_RESOLUTION: "${DESKTOP_RESOLUTION:-1366x768}"
+    networks: [desktopnet]
+    # CSS lokal tetap tersedia; desktop tidak memerlukan CDN publik.
+    extra_hosts: ["cdn.jsdelivr.net:127.0.0.1"]
+    volumes: ["desktop-files:/home/student/lab-files"]
+    mem_limit: "${DESKTOP_MEMORY:-1200m}"
+    pids_limit: 256
+    depends_on:
+      lab-target: {condition: service_healthy}
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+    healthcheck:
+      test: [CMD, python3, /opt/desktop/healthcheck.py]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  desktop-gateway:
+    profiles: [desktop]
+    build: ./tools/desktop-gateway
+    user: "101:101"
+    read_only: true
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      DESKTOP_USER: "${DESKTOP_USER:-praktikum}"
+      DESKTOP_PASSWORD: "${DESKTOP_PASSWORD:?Jalankan scripts/start-desktop.ps1 atau scripts/start-desktop.sh dahulu}"
+    sysctls:
+      net.ipv4.ip_forward: "0"
+    ports: ["127.0.0.1:${DESKTOP_PORT:-6080}:6080"]
+    networks: [desktopnet, desktopaccess]
+    depends_on:
+      lab-desktop: {condition: service_healthy}
+    mem_limit: 48m
+    pids_limit: 32
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}
+    healthcheck:
+      test: [CMD-SHELL, "wget -q -O /dev/null http://127.0.0.1:6081/health"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+
+networks:
+  desktopnet:
+    driver: bridge
+    internal: true
+    ipam:
+      config: [{subnet: 172.31.250.0/24}]
+  desktopaccess:
+    driver: bridge
+
+volumes:
+  desktop-files:

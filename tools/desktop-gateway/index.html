@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desktop Praktikum</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#17253e;font:16px/1.6 system-ui,sans-serif}main{max-width:760px;margin:8vh auto;padding:32px;background:white;border:1px solid #dce4ee;border-radius:18px}h1{font-size:30px;line-height:1.25}a.button{display:inline-block;background:#175ccc;color:white;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600}code{background:#eef2f7;padding:3px 6px;border-radius:4px}pre{background:#eef2f7;padding:16px;overflow:auto;white-space:pre-wrap}li{margin:9px 0}.note{color:#52627a;font-size:14px}@media(max-width:600px){main{margin:20px;padding:22px}h1{font-size:26px}}
+</style></head><body><main>
+<p class="note">LAB JARINGAN · NMAP + WIRESHARK</p><h1>Masuk ke desktop praktikum</h1>
+<p>Gunakan terminal Linux dan Wireshark asli langsung dari browser.</p>
+<p><a class="button" href="/vnc.html?autoconnect=true&amp;resize=scale&amp;path=websockify&amp;shared=true">Buka desktop</a></p>
+<ol><li>Jalankan Nmap di terminal desktop menggunakan IP <code>172.31.250.10</code>.</li>
+<li>Buka Wireshark melalui menu klik kanan, pilih <code>eth0</code>, lalu mulai capture.</li>
+<li>Buka TokoKu melalui menu desktop dan lakukan login dengan data dummy.</li></ol>
+<pre>nmap -sT -Pn -n -sV -p 21,22,23,25,3306,6379,8080,27017 172.31.250.10</pre>
+<p class="note">Desktop ini dipakai bersama. Bergantian mengendalikan mouse dan keyboard. Gunakan laptop/PC agar tools nyaman dipakai. Scan hanya target lab.</p>
+</main></body></html>

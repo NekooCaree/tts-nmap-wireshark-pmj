@@ -1,0 +1,136 @@
+name: nmap-fake-services-lab
+
+x-python: &python-service
+  user: "10001:10001"
+  read_only: true
+  tmpfs: ["/tmp:size=16m,mode=1777"]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  sysctls:
+    net.ipv4.ip_unprivileged_port_start: "0"
+  networks: [labnet]
+  environment: &python-env
+    PYTHONUNBUFFERED: "1"
+    PYTHONDONTWRITEBYTECODE: "1"
+    MAX_CONNECTIONS: "${MAX_CONNECTIONS:-64}"
+    CLIENT_TIMEOUT: "${CLIENT_TIMEOUT:-8}"
+  mem_limit: 96m
+  pids_limit: 96
+  logging: &lab-logging
+    driver: json-file
+    options: {max-size: "5m", max-file: "2"}
+
+services:
+  web-toko:
+    build: ./services/web-toko
+    ports: ["127.0.0.1:${WEB_PORT:-8080}:8080"]
+    user: node
+    read_only: true
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    cap_add: [NET_RAW]
+    security_opt: ["no-new-privileges:true"]
+    sysctls:
+      net.ipv4.ping_group_range: "0 2147483647"
+    environment:
+      PORT: "8080"
+      NODE_ENV: production
+      TOKOKU_DATA_DIR: /data
+      DNS_ALLOWED_HOSTS: "${DNS_ALLOWED_HOSTS:-example.com}"
+      PING_ALLOWED_HOSTS: "${PING_ALLOWED_HOSTS:-8.8.8.8,1.1.1.1}"
+    networks: [labnet]
+    volumes: ["web-data:/data"]
+    mem_limit: 160m
+    pids_limit: 64
+    logging: *lab-logging
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8080/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+  ftp-fake:
+    <<: *python-service
+    build: ./services/ftp-fake
+    ports: ["127.0.0.1:${FTP_PORT:-21}:21", "127.0.0.1:30000-30009:30000-30009"]
+    volumes: ["ftp-data:/data/ftp"]
+    environment:
+      <<: *python-env
+      FTP_ROOT: /data/ftp
+      FTP_USER: "${FTP_USER:-mahasiswa}"
+      FTP_PASSWORD: "${FTP_PASSWORD:-ftpbelajar123}"
+      FTP_PASV_ADDRESS: "${FTP_PASV_ADDRESS:-127.0.0.1}"
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',21),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+  ssh-fake:
+    <<: *python-service
+    build: ./services/ssh-fake
+    ports: ["127.0.0.1:${SSH_PORT:-22}:22"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',22),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+  smtp-fake:
+    <<: *python-service
+    build: ./services/smtp-fake
+    ports: ["127.0.0.1:${SMTP_PORT:-25}:25"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',25),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+  mysql-fake:
+    <<: *python-service
+    build: ./services/mysql-fake
+    ports: ["127.0.0.1:${MYSQL_PORT:-3306}:3306"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',3306),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+  redis-fake:
+    <<: *python-service
+    build: ./services/redis-fake
+    ports: ["127.0.0.1:${REDIS_PORT:-6379}:6379"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; s=socket.create_connection(('127.0.0.1',6379),2); s.sendall(b'PING\\r\\n'); assert s.recv(64)==b'+PONG\\r\\n'"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+  telnet-fake:
+    <<: *python-service
+    build: ./services/telnet-fake
+    ports: ["127.0.0.1:${TELNET_PORT:-23}:23"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',23),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+  mongodb-fake:
+    <<: *python-service
+    build: ./services/mongodb-fake
+    ports: ["127.0.0.1:${MONGODB_PORT:-27017}:27017"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('127.0.0.1',27017),2).close()"]
+      interval: 20s
+      timeout: 4s
+      retries: 3
+      start_period: 5s
+
+networks:
+  labnet:
+    driver: bridge
+
+volumes:
+  web-data:
+  ftp-data:
